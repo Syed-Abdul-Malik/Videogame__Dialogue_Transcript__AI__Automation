@@ -57,62 +57,61 @@ Repository Structure
 └── index.html       # Web application client UI interface
 ```
 
-**Prerequisites**
+## Prerequisites
 
-``` A Google Account with Google Drive access.
+1. A Google Account with Google Drive access.
 
-Access to Google Apps Script.
+2. Access to [Google Apps Script](https://script.google.com).
 
-Google Advanced Services enabled for Drive API (v2).
+3. Google Advanced Services enabled for **Drive API (v2)**.
 
-Setup & Deployment Instructions
+---
 
-**1. Create the Apps Script Project**
+## Setup & Deployment Instructions
 
-Open Google Drive or Google Apps Script.
+### 1. Create the Apps Script Project
 
-Click New Project and name it Pertinent-Line-Detector.
+1. Open [Google Drive](https://drive.google.com) or [Google Apps Script](https://script.google.com).
 
-**2. Add Source Code**
+2. Click **New Project** and name it `Pertinent-Line-Detector`.
 
-Open the default Code.gs file in the Apps Script editor.
+### 2. Add Source Code
 
-Replace all placeholder contents with the code provided in Code.gs.
+1. Open the default `Code.gs` file in the Apps Script editor.
 
-In the left editor menu, click the + icon next to Files and select HTML.
+2. Replace all placeholder contents with the code provided in `Code.gs`.
 
-Name the file index (creating index.html) and paste your client UI code.
+3. In the left editor menu, click the **+** icon next to **Files** and select **HTML**.
 
-**3. Enable the Drive API Service**
+4. Name the file `index` (creating `index.html`) and paste your client UI code.
+
+### 3. Enable the Drive API Service
 
 Because uploaded Excel files are converted programmatically to native Google Sheets, you must enable the Drive service:
 
-In the left sidebar, click the + icon next to Services.
+1. In the left sidebar, click the **+** icon next to **Services**.
 
-Select Drive API from the list.
+2. Select **Drive API** from the list.
 
-Select version v2 and click Add.
+3. Select version **v2** and click **Add**.
 
-**4. Deploy as a Web App**
+### 4. Deploy as a Web App
 
-In the top-right corner, click Deploy > New deployment.
+1. In the top-right corner, click **Deploy** > **New deployment**.
 
-Click the gear icon (Select type) and select Web app.
+2. Click the gear icon (**Select type**) and select **Web app**.
 
-Configure the deployment settings:
+3. Configure the deployment settings:
 
-Description: Pertinent Line Detector - Production v1
+   * **Description**: `Pertinent Line Detector - Production v1`
 
-Execute as: Me (Required so Drive folder creation operates under your permissions)
+   * **Execute as**: `Me` *(Required so Drive folder creation operates under your permissions)*
 
-Who has access: Anyone within your organization (or Anyone depending on team access requirements)
+   * **Who has access**: `Anyone within your organization` (or `Anyone` depending on team access requirements)
 
-Click Deploy and grant the requested OAuth permissions.
+4. Click **Deploy** and grant the requested OAuth permissions.
 
-Copy the generated Web App URL and share it with your team.
-
-```
-
+5. Copy the generated **Web App URL** and share it with your team.
 
 ## Configuration & Wordlist Management
 
@@ -138,3 +137,5 @@ To change the output directory name, edit `OUTPUT_FOLDER_NAME` in `Code.gs`:
 const OUTPUT_FOLDER_NAME = "Malik's NWS Automation output";
 
 ```
+
+
