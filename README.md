@@ -59,7 +59,7 @@ Repository Structure
 
 **Prerequisites**
 
-A Google Account with Google Drive access.
+``` A Google Account with Google Drive access.
 
 Access to Google Apps Script.
 
@@ -111,9 +111,11 @@ Click Deploy and grant the requested OAuth permissions.
 
 Copy the generated Web App URL and share it with your team.
 
+```
+
 **Configuration & Wordlist Management**
 
-Default Wordlist
+**Default Wordlist**
 
 The baseline dictionary is configured in Code.gs under NAUGHTY_WORDS_TO_FIND.
 
