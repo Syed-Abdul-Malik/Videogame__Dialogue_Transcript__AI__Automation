@@ -113,24 +113,28 @@ Copy the generated Web App URL and share it with your team.
 
 ```
 
-**Configuration & Wordlist Management**
 
-**Default Wordlist**
+## Configuration & Wordlist Management
 
-The baseline dictionary is configured in Code.gs under NAUGHTY_WORDS_TO_FIND.
+### Default Wordlist
 
-**Persistent Keyword Storage**
+The baseline dictionary is configured in `Code.gs` under `NAUGHTY_WORDS_TO_FIND`.
 
-The script caches active search terms in PropertiesService.getScriptProperties() under the key NAUGHTY_WORDS. You can manage words programmatically via:
+### Persistent Keyword Storage
 
-getNaughtyWords(): Returns the active dictionary array.
+The script caches active search terms in `PropertiesService.getScriptProperties()` under the key `NAUGHTY_WORDS`. You can manage words programmatically via:
 
-addNaughtyWord(word): Adds a new keyword to persistent storage.
+* `getNaughtyWords()`: Returns the active dictionary array.
 
-deleteNaughtyWord(word): Removes a keyword from persistent storage.
+* `addNaughtyWord(word)`: Adds a new keyword to persistent storage.
 
-**Output Folder**
+* `deleteNaughtyWord(word)`: Removes a keyword from persistent storage.
 
-To change the output directory name, edit OUTPUT_FOLDER_NAME in Code.gs:
+### Output Folder
 
+To change the output directory name, edit `OUTPUT_FOLDER_NAME` in `Code.gs`:
+
+```
 const OUTPUT_FOLDER_NAME = "Malik's NWS Automation output";
+
+```
