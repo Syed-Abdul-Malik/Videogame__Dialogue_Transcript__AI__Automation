@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <title>Naughty Word Search Automation</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* --- Keyframe Animations --- */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes listItemEnter {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    /* --- NEW: Page-wide fade in --- */
+    @keyframes pageFadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* --- UPDATED: Advanced Developer Name Animation (shimmer is now JS-driven) --- */
+    @keyframes subtleSlideIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* --- NEW: Subtle pulse for dropzone text --- */
+    @keyframes subtlePulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.03); opacity: 0.9; }
+    }
+
+
+    /* --- Base Styles --- */
+    body {
+      font-family: 'Poppins', sans-serif;
+      /* --- NEW: SaaS Light Background --- */
+      background: #F9FAFB;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2.5rem;
+      margin: 0;
+      min-height: 100vh;
+      box-sizing: border-box;
+      color: #111827; /* --- NEW: Default text dark --- */
+      /* --- NEW: Hide default cursor --- */
+      cursor: none;
+      /* --- NEW: Add overflow-x hidden to prevent layout shifts from tilt --- */
+      overflow-x: hidden;
+    }
+
+    /* --- NEW: Custom Cursor Styles --- */
+    .cursor-dot {
+      width: 8px;
+      height: 8px;
+      /* --- NEW: SaaS Indigo Accent --- */
+      background-color: #4F46E5;
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 10000;
+      transition: transform 0.2s ease-out;
+      transform: translate(-50%, -50%); /* Center on cursor */
+    }
+
+    .cursor-outline {
+      width: 40px;
+      height: 40px;
+      /* --- NEW: SaaS Indigo Accent --- */
+      border: 2px solid rgba(79, 70, 229, 0.5);
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 10000;
+      transition: all 0.3s ease-out;
+      transform: translate(-50%, -50%); /* Center on cursor */
+    }
+    
+    /* Cursor animation state */
+    .cursor-outline.grow {
+      transform: translate(-50%, -50%) scale(1.5);
+      /* --- NEW: SaaS Indigo Accent --- */
+      background-color: rgba(79, 70, 229, 0.1);
+      border-color: rgba(79, 70, 229, 0.2);
+    }
+    
+    /* Hide custom cursor on touch devices where it's not needed */
+    @media (pointer: coarse) {
+      .cursor-dot, .cursor-outline {
+        display: none;
+      }
+      body {
+        cursor: auto; /* Restore default cursor */
+      }
+    }
+
+    /* --- NEW: Page Wrapper for fade-in --- */
+    .page-wrapper {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      /* Apply page fade-in here */
+      animation: pageFadeIn 1s ease-out forwards;
+      /* --- NEW: Add perspective for 3D tilt effect --- */
+      perspective: 1000px;
+    }
+
+
+    /* --- Developer Name --- */
+    .developer-branding {
+      font-size: 1.1rem; /* Made it bigger */
+      font-weight: 700;
+      margin-bottom: 2rem;
+      /* --- NEW: SaaS Gradient Text (Indigo Theme) --- */
+      background: linear-gradient(to right, #4F46E5, #D946EF, #4F46E5);
+      background-size: 500% auto;
+      color: #000;
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      /* --- UPDATED: Applying high animation --- */
+      /* textShimmer animation removed, now controlled by JS */
+      animation: subtleSlideIn 1.5s ease-out forwards;
+      opacity: 0; /* Start hidden for slide in */
+      letter-spacing: 1px;
+      /* --- NEW: Transition for background position --- */
+      transition: background-position 0.2s ease-out;
+    }
+
+    h1, h2 {
+      color: #111827; /* --- NEW: Dark color for light card --- */
+      font-weight: 700;
+      margin-top: 0;
+      margin-bottom: 1.5rem;
+    }
+
+    p {
+      color: #6B7280; /* --- NEW: SaaS secondary text --- */
+      line-height: 1.6;
+      font-weight: 400;
+    }
+
+    button,
+    a,
+    label[for="fileUpload"] {
+      /* --- NEW: Ensure custom cursor is used --- */
+      cursor: none;
+    }
+
+    button {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      border-radius: 10px; /* Slightly more rounded */
+      /* cursor: pointer; -- REMOVED for custom cursor */
+      border: none;
+      transition: all 0.25s ease;
+      padding: 12px 28px;
+      font-size: 1rem;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    /* --- Settings Button (Top Right) --- */
+    #settingsBtn {
+      position: absolute;
+      top: 25px;
+      right: 25px;
+      /* --- NEW: SaaS Light theme --- */
+      background: #ffffff;
+      border: 1px solid #E5E7EB;
+      color: #6B7280;
+      padding: 10px;
+      border-radius: 50%;
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      animation: fadeIn 0.8s ease forwards 0.5s; /* Added delay */
+      opacity: 0;
+    }
+    #settingsBtn:hover {
+      background-color: #F9FAFB;
+      border-color: #D1D5DB;
+      color: #4F46E5; /* --- NEW: Accent color --- */
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07);
+    }
+    
+    /* --- Main Upload Card --- */
+    .upload-container {
+      /* --- NEW: SaaS Light theme card --- */
+      background-color: #ffffff;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid #E5E7EB;
+      padding: 3rem 3.5rem;
+      border-radius: 20px; /* More rounded corners */
+      box-shadow: 0 15px 60px rgba(0, 0, 0, 0.05); /* Lighter shadow */
+      width: 90%;
+      max-width: 650px; /* Slightly wider */
+      text-align: center;
+      animation: slideInUp 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards 0.2s; /* Delayed animation */
+      opacity: 0; /* Starts hidden */
+      /* --- NEW: Add 3D transform properties for tilt --- */
+      transform-style: preserve-3d;
+      transition: transform 0.1s ease-out;
+    }
+    
+    /* --- File Drop Zone --- */
+    #dropZone {
+      /* --- NEW: SaaS Light theme --- */
+      border: 3px dashed #A5B4FC; /* --- NEW: Accent color --- */
+      border-radius: 15px;
+      padding: 3.5rem;
+      background-color: #F9FAFB; /* Light interior */
+      transition: all 0.3s ease;
+      /* cursor: pointer; -- REMOVED for custom cursor */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    #dropZone svg {
+      color: #6366F1; /* --- NEW: Accent color --- */
+      margin-bottom: 1rem;
+    }
+    #dropZone p {
+      font-weight: 500;
+      color: #6B7280;
+      margin: 0.5rem 0 0;
+    }
+    #dropZone .file-label {
+      font-weight: 600;
+      color: #4F46E5; /* --- NEW: Accent color --- */
+      text-decoration: underline;
+      /* --- NEW: Add pulsing animation --- */
+      animation: subtlePulse 2.5s ease-in-out infinite;
+    }
+    #dropZone.dragover {
+      border-color: #4F46E5; /* --- NEW: Brighter Accent --- */
+      background-color: #EEF2FF; /* Highlight color */
+      transform: scale(1.02);
+      box-shadow: 0 0 20px rgba(79, 70, 229, 0.1);
+    }
+    
+    input[type="file"] {
+      display: none;
+    }
+
+    /* --- File Preview (after selection) --- */
+    #filePreview {
+      display: none;
+      text-align: left;
+      /* --- NEW: SaaS Light theme --- */
+      border: 1px solid #E5E7EB;
+      border-radius: 12px;
+      padding: 1.8rem;
+      background: #F9FAFB;
+      animation: slideInUp 0.4s ease forwards;
+      margin-top: 1.5rem; /* Space after dropzone */
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+    #filePreview h3 {
+      font-weight: 600;
+      font-size: 1.2rem;
+      color: #111827;
+      margin: 0;
+    }
+    #fileName {
+      font-style: italic;
+      color: #6B7280;
+      word-break: break-all;
+      font-size: 1rem;
+    }
+
+    /* --- Submit Button --- */
+    #submitBtn {
+      background-color: #28a745; /* Success green */
+      color: white;
+      width: 100%;
+      margin-top: 2rem;
+      display: none;
+      animation: slideInUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards 0.3s;
+    }
+    #submitBtn:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    #submitBtn:hover:not(:disabled) {
+      background-color: #218838;
+      transform: translateY(-3px) scale(1.01);
+      box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+    }
+
+    /* --- Loader & Result --- */
+    .loader {
+      display: none;
+      margin-top: 2rem;
+      text-align: center;
+      animation: fadeIn 0.5s ease forwards;
+    }
+    .loader .spinner {
+      border: 5px solid #E5E7EB; /* Light theme */
+      border-top: 5px solid #4F46E5; /* --- NEW: Accent color --- */
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
+    .loader p {
+      font-weight: 500;
+      color: #6B7280;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    
+    #result {
+      margin-top: 2rem;
+      animation: slideInUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+      opacity: 0;
+      width: 100%; /* Ensure result div takes full width */
+    }
+    #result.success .result-message { /* UPDATED */
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #155724; /* Darker text on light background */
+      background-color: #e6ffe6;
+      padding: 1rem 1.5rem;
+      border-radius: 10px;
+      border: 1px solid #28a745;
+    }
+    #result a {
+      background-color: #28a745;
+      color: white;
+      text-decoration: none;
+      padding: 14px 30px;
+      border-radius: 10px;
+      display: inline-block;
+      margin-top: 1.5rem;
+      box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
+    }
+    #result a:hover {
+      background-color: #218838;
+      transform: translateY(-3px) scale(1.01);
+      box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+    }
+    #result.error p {
+      color: #721c24; /* Darker text on light background */
+      font-weight: 500;
+      background-color: #ffe6e6;
+      border: 1px solid #dc3545;
+      padding: 1.2rem;
+      border-radius: 10px;
+    }
+
+    /* --- NEW: AI Summary Result Styling --- */
+    /* --- REMOVED Gemini AI Summary Styles --- */
+
+
+    /* --- Settings Modal --- */
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6); /* Darker backdrop */
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      z-index: 1000;
+    }
+    .modal-backdrop.show {
+      display: flex;
+      opacity: 1;
+    }
+    
+    .modal-content {
+      /* --- NEW: SaaS Light theme --- */
+      background: #ffffff;
+      border: 1px solid #E5E7EB;
+      border-radius: 20px;
+      padding: 2.5rem 3rem;
+      width: 90%;
+      max-width: 550px;
+      box-shadow: 0 15px 60px rgba(0, 0, 0, 0.15);
+      position: relative;
+      opacity: 0;
+      transform: translateY(-50px);
+      transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    .modal-backdrop.show .modal-content {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    #closeModalBtn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: none;
+      border: none;
+      font-size: 2.2rem; /* Larger close button */
+      color: #9CA3AF; /* Light gray */
+      padding: 0;
+      width: 35px;
+      height: 35px;
+    }
+    #closeModalBtn:hover {
+      color: #111827;
+      transform: scale(1.15) rotate(90deg); /* More dramatic close animation */
+    }
+    
+    .naughty-word-list { /* UPDATED class name */
+      max-height: 300px; /* Taller list */
+      overflow-y: auto;
+      /* --- NEW: SaaS Light theme --- */
+      border: 1px solid #E5E7EB;
+      border-radius: 12px;
+      margin-top: 1.8rem;
+      padding: 0.8rem;
+      background-color: #F9FAFB;
+    }
+    .naughty-word-item { /* UPDATED class name */
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px;
+      border-bottom: 1px solid #E5E7EB;
+      font-weight: 500;
+      color: #374151;
+      animation: listItemEnter 0.4s ease forwards;
+    }
+    .naughty-word-item:last-child { border-bottom: none; } /* UPDATED class name */
+    
+    .delete-btn {
+      background-color: #FEE2E2; /* Light red */
+      color: #B91C1C; /* Darker red text */
+      border: none;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      padding: 8px 14px;
+      box-shadow: none;
+    }
+    .delete-btn:hover {
+      background-color: #DC2626;
+      color: #fff;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(220, 53, 69, 0.2);
+    }
+    
+    .add-keyword {
+      display: flex;
+      margin-top: 1.5rem;
+    }
+    #newKeywordInput {
+      flex-grow: 1;
+      /* --- NEW: SaaS Light theme --- */
+      border: 1px solid #D1D5DB;
+      background: #ffffff;
+      color: #111827;
+      border-radius: 10px;
+      padding: 12px 15px;
+      font-size: 1rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      /* --- NEW: Ensure custom cursor is used --- */
+      cursor: none;
+    }
+    #newKeywordInput:focus {
+      outline: none;
+      border-color: #4F46E5; /* --- NEW: Accent color --- */
+      box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+    }
+    
+    #addKeywordBtn {
+      /* --- NEW: Accent Theme color --- */
+      background-color: #4F46E5; /* Indigo */
+      color: white;
+      padding: 12px 25px;
+      margin-left: 0.8rem;
+    }
+    #addKeywordBtn:hover {
+      background-color: #4338CA; /* Darker Indigo */
+      box-shadow: 0 6px 18px rgba(79, 70, 229, 0.2);
+    }
+
+    #statusMessage {
+      text-align: center;
+      margin-top: 1.2rem;
+      font-weight: 500;
+      font-size: 0.95rem;
+      padding: 0.8rem;
+      border-radius: 8px;
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    /* SVG icon styling for better visual */
+    .icon-upload {
+      stroke: #6366F1; /* --- NEW: Accent color --- */
+      stroke-width: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NEW: Custom Cursor Elements -->
+  <div class="cursor-dot"></div>
+  <div class="cursor-outline"></div>
+
+  <!-- NEW: Page Wrapper for fade-in -->
+  <div class="page-wrapper">
+    <div class="developer-branding">Developed by Syed Abdul Malik</div>
+
+    <!-- Settings Gear Button --><button id="settingsBtn" title="Manage Naughty Words">
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" viewBox="0 0 16 16">
+        <path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c-1.4-.413-1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.858 2.929 2.929 0 0 1 0 5.858z"/>
+      </svg>
+    </button>
+
+    <!-- Main Upload Card --><div class="upload-container">
+      <h1>Naughty Word Search Automation</h1>
+      <p>Upload Excel file (reads only excel files)</p>
+      
+      <form id="uploadForm">
+        <!-- New Drag and Drop Zone --><label for="fileUpload" id="dropZone">
+          <div>
+            <svg class="icon-upload" xmlns="http://www.w3.org/2000/svg" width="60" height="60" fill="none" viewBox="0 0 24 24">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.75V19.25"/>
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18.25 13.75L12 19.25L5.75 13.75"/>
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5.75 16.75C3.67157 16.75 2.75 15.5 2.75 12.75C2.75 9.07342 5.56832 7.02528 7.25 7C7.50284 5.37894 8.78362 3.75 12 3.75C16.4883 3.75 18.25 5.85507 18.25 8.75C18.25 11.5 17.5 12.75 15.25 12.75H12"/>
+            </svg>
+          </div>
+          <p><span class="file-label">Click to browse</span> or drag your file here</p>
+        </label>
+        
+        <input type="file" id="fileUpload">
+        
+        <!-- This section appears after file selection --><div id="filePreview">
+          <h3>Selected File:</h3>
+          <span id="fileName">No file selected</span>
+        </div>
+
+        <button type="button" id="submitBtn" onclick="uploadFile()">Search Naughty Word</button>
+      </form>
+      
+      <div class="loader" id="loader">
+        <div class="spinner"></div>
+        <p>searching naughty words</p>
+      </div>
+      
+      <div id="result"></div>
+    </div>
+  </div> <!-- End of Page Wrapper -->
+
+  <!-- Keyword Manager (Modal) --><div id="settingsModal" class="modal-backdrop">
+    <div class="modal-content">
+      <button id="closeModalBtn" title="Close">&times;</button>
+      <h2>Naughty Word Manager</h2>
+      <p>Manage the list of "naughty words" used for analysis.</p>
+      
+      <div class="add-keyword">
+        <input type="text" id="newKeywordInput" placeholder="Enter new Naughty Word">
+        <button id="addKeywordBtn" onclick="addNaughtyWord()">Add</button> <!-- UPDATED function call -->
+      </div>
+      
+      <div id="statusMessage" style="display: none;"></div>
+
+      <div class="naughty-word-list" id="naughtyWordList"> <!-- UPDATED class and ID -->
+        <!-- Naughty words will be loaded here --></div> <!-- UPDATED comment -->
+    </div>
+  </div>
+
+
+  <script>
+    let selectedItem = null; // <-- RENAMED from selectedFile
+    const isAppsScriptEnv = (typeof google !== 'undefined' && google.script && google.script.run);
+    
+    // Get all the elements we need
+// ... existing code ... -->
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      
+      // --- NEW: Check for files OR a URL ---
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        // Path 1: A file was dropped
+        const file = e.dataTransfer.files[0];
+        fileInput.files = e.dataTransfer.files; // Sync with the input
+        handleFileSelect(file);
+      } else {
+        // Path 2: Check if text/URL was dropped
+        const textData = e.dataTransfer.getData('text/plain');
+        if (textData && textData.startsWith('https://docs.google.com/spreadsheets/')) {
+          handleFileSelect(textData); // Pass the URL string
+        }
+      }
+    });
+    
+// ... existing code ... -->
+    /**
+     * Called when the user selects a file (by drop or click).
+     */
+    function handleFileSelect(file) {
+      selectedItem = file; // <-- Use selectedItem
+      
+      // --- NEW: Handle item if it's a File object or a URL string ---
+      if (typeof selectedItem === 'string') {
+        fileNameEl.textContent = selectedItem; // Show the URL
+      } else {
+        fileNameEl.textContent = selectedItem.name; // Show the file name
+      }
+      
+      // Animate the UI changes
+// ... existing code ... -->
+    /**
+     * Called when the user clicks the "Analyze File" button.
+     */
+    function uploadFile() {
+      if (!selectedItem || !isAppsScriptEnv) { // <-- Check selectedItem
+        if (!isAppsScriptEnv) {
+// ... existing code ... -->
+      resultDiv.className = '';
+      hideStatusMessage();
+
+      // --- NEW: Branch logic based on item type (File or URL) ---
+      
+      if (typeof selectedItem === 'string') {
+        // --- Path 1: It's a URL. Send it directly. ---
+        const fileObject = {
+          type: 'application/vnd.google-apps.spreadsheet',
+          url: selectedItem,
+          name: selectedItem
+        };
+        google.script.run
+          .withSuccessHandler(onUploadSuccess)
+          .withFailureHandler(onUploadFailure)
+          .processUploadedFile(fileObject);
+
+      } else {
+        // --- Path 2: It's a File. Read it. ---
+        const reader = new FileReader();
+        
+        if (selectedItem.name.toLowerCase().endsWith('.gsheet')) {
+          // --- Path 2a: It's a .gsheet shortcut file. Read as text. ---
+          reader.onload = function(e) {
+            const fileObject = {
+              data: e.target.result, // This is the JSON string
+              type: 'application/vnd.google-apps.shortcut', // Custom type
+              name: selectedItem.name
+            };
+            google.script.run
+              .withSuccessHandler(onUploadSuccess)
+              .withFailureHandler(onUploadFailure)
+              .processUploadedFile(fileObject);
+          };
+          reader.readAsText(selectedItem);
+
+        } else {
+          // --- Path 2b: It's an Excel/other file. Read as bytes. ---
+          reader.onload = function(e) {
+            const fileObject = {
+              // --- OPTIMIZATION 1: Send raw bytes, not Base64 ---
+              data: Array.from(new Uint8Array(e.target.result)),
+              type: selectedItem.type,
+              name: selectedItem.name
+            };
+            google.script.run
+              .withSuccessHandler(onUploadSuccess) // <-- MAJOR FIX HERE
+              .withFailureHandler(onUploadFailure)
+              .processUploadedFile(fileObject);
+          };
+          // --- OPTIMIZATION 1 (continued): Read as ArrayBuffer ---
+          reader.readAsArrayBuffer(selectedItem);
+        }
+      }
+    }
+
+    /**
+// ... existing code ... -->
+    function resetForm() {
+      loader.style.display = 'none';
+// ... existing code ... -->
+      dropZone.style.display = 'flex'; // Show drop zone again (it's now flex)
+      fileInput.value = null; 
+      selectedItem = null; // <-- Use selectedItem
+      
+      // Do NOT clear the resultDiv here, so the user can see the link/summary
+// ... existing code ... -->
